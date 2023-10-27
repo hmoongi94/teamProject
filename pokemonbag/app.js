@@ -17,32 +17,6 @@ app.get('/', (req, res) => {
 app.get('/sub', (req, res) => {
   res.sendFile(__dirname + '/public/sub.html');
 });
-let savedData = null;
-
-app.post('/send-data', (req, res) => {
-  savedData = req.body.data;
-  //  json데이터 파일로 saveddata를 push로 해서 넣기
-  fs.writeFile('data/data.json', JSON.stringify(savedData), 'utf-8', (err) => {
-    if (err) {
-      res.status(500).json({ message: '데이터 저장 중 오류 발생' });
-    } else {
-      res.json({ message: '데이터가 서버로 전송되었습니다.' });
-    }
-  });
-  res.json({ message: '데이터가 서버로 전송되었습니다.' });
-});
-
-app.get('/get-data', (req, res) => {
-  // data.json 파일에서 데이터를 읽어옵니다.
-  fs.readFile('data/data.json', 'utf-8', (err, data) => {
-    if (err) {
-      res.status(500).json({ message: '데이터 읽기 중 오류 발생' });
-    } else {
-      const parsedData = JSON.parse(data);
-      res.json({ data: parsedData });
-    }
-  });
-});
 
 
 
@@ -55,6 +29,39 @@ app.get('/data', (req, res) => {
   res.send(data);
 });
 
+
+// body-parser 미들웨어 설정
+app.use(express.json());
+app.post('/save-text', (req, res) => {
+    const text = req.body.text;
+    
+    // 파일 경로 설정
+    const filePath = path.join(__dirname, './public/data/data.json');
+
+    // 파일의 현재 내용 읽기
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to read the file.' });
+        }
+
+        let texts = [];
+        if (data) {
+            texts = JSON.parse(data);
+        }
+
+        // 새로운 text 추가
+        texts.push(text);
+
+        // 파일에 업데이트 된 내용 저장
+        fs.writeFile(filePath, JSON.stringify(texts, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Failed to write to the file.' });
+            }
+
+            res.status(200).json({ message: 'Text saved successfully!' });
+        });
+    });
+});
 
 
 // 서버 시작
