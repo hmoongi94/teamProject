@@ -17,6 +17,32 @@ app.get('/', (req, res) => {
 app.get('/sub', (req, res) => {
   res.sendFile(__dirname + '/public/sub.html');
 });
+let savedData = null;
+
+app.post('/send-data', (req, res) => {
+  savedData = req.body.data;
+  //  json데이터 파일로 saveddata를 push로 해서 넣기
+  fs.writeFile('data/data.json', JSON.stringify(savedData), 'utf-8', (err) => {
+    if (err) {
+      res.status(500).json({ message: '데이터 저장 중 오류 발생' });
+    } else {
+      res.json({ message: '데이터가 서버로 전송되었습니다.' });
+    }
+  });
+  res.json({ message: '데이터가 서버로 전송되었습니다.' });
+});
+
+app.get('/get-data', (req, res) => {
+  // data.json 파일에서 데이터를 읽어옵니다.
+  fs.readFile('data/data.json', 'utf-8', (err, data) => {
+    if (err) {
+      res.status(500).json({ message: '데이터 읽기 중 오류 발생' });
+    } else {
+      const parsedData = JSON.parse(data);
+      res.json({ data: parsedData });
+    }
+  });
+});
 
 
 
