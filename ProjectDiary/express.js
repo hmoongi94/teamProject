@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const fs = require('fs');
 const path = require('path');
-const qs = require('querystring');
 
 const DATA_FILE = 'data.json';
 
