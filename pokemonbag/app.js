@@ -1,91 +1,26 @@
-const http = require('http');
-const fs = require('fs');
+const express = require('express');
+const app = express();
 const path = require('path');
-const qs = require('querystring');
+const fs = require('fs');
+const port = 5001;
 
-const DATA_FILE = 'data.json';
+// 정적 파일 제공을 위한 미들웨어 설정
+app.use(express.static('public'));
 
-const server = http.createServer((req, res) => {
-  const method = req.method;
-  const url = req.url;
-
-  if (method === 'GET') {
-    if (url === '/' || url === '/index.html') {
-      const filePath = path.join(__dirname, 'index.html');
-      fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Internal Server Error');
-        } else {
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.end(data);
-        }
-      });
-    } else if (url === '/style.css') {
-      const filePath = path.join(__dirname, 'style.css');
-      fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Internal Server Error');
-        } else {
-          res.writeHead(200, { 'Content-Type': 'text/css' });
-          res.end(data);
-        }
-      });
-    } else if (url === '/data') {
-      // JSON 데이터 파일에서 게시물 데이터를 불러오기
-      fs.readFile(DATA_FILE, 'utf8', (err, data) => {
-        if (err) {
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Internal Server Error');
-        } else {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(data);
-        }
-      });
-    } else {
-      // 다른 정적 파일 서비스 (CSS, 이미지 등) 추가
-    }
-  } else if (method === 'POST' && url === '/submit') {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      const postData = qs.parse(body);
-
-      // JSON 데이터 파일에서 게시물 데이터 불러오기
-      fs.readFile(DATA_FILE, 'utf8', (err, data) => {
-        if (err) {
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Internal Server Error');
-        } else {
-          const jsonData = JSON.parse(data);
-
-          // 새 게시물 데이터 추가
-          jsonData.push(postData);
-
-          // JSON 데이터 파일에 쓰기
-          fs.writeFile(DATA_FILE, JSON.stringify(jsonData, null, 2), 'utf8', (err) => {
-            if (err) {
-              res.writeHead(500, { 'Content-Type': 'text/plain' });
-              res.end('Internal Server Error');
-            } else {
-              // 새 게시물을 생성하고 메인 페이지로 리디렉션
-              res.writeHead(302, { Location: '/' });
-              res.end();
-            }
-          });
-        }
-      });
-    });
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
-  }
+app.get('/', (req, res) => {
+  const data = {};
+  fs.writeFileSync('public/data.json', JSON.stringify(data));
+  res.sendFile(__dirname + '/public/index.html');
 });
 
-// * loadData전용 라우팅 /data 엔드포인트로 작성된다.
+// GET 요청으로 "sub.html" 제공
+app.get('/sub', (req, res) => {
+  res.sendFile(__dirname + '/public/sub.html');
+});
+
+
+
+// * loadData전용 라우팅 /data 엔드폰이트로 작성된다.
 // * data.json을 읽도록 요청받은 것을 해결하여 데이터를 보낸다.
 
 app.get('/data', (req, res) => {
