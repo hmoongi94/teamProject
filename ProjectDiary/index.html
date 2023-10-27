@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시판</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <h1>게시판</h1>
+  <ul id="post-list">
+    <!-- 게시물 목록이 여기에 동적으로 추가됩니다 -->
+  </ul>
+  <h2>프로젝트 새게시물</h2>
+  <form action="/submit" method="post">
+    <label for="project-name">프로젝트명:</label>
+    <input type="text" id="project-name" name="project-name" required>
+
+    <label for="start-date">시작 날짜:</label>
+    <input type="text" id="start-date" name="start-date" placeholder="YYYY-MM-DD" required>
+
+    <label for="end-date">완료 날짜:</label>
+    <input type="text" id="end-date" name="end-date" placeholder="YYYY-MM-DD" required>
+
+    <label for="repository-url">Git Repository URL:</label>
+    <input type="text" id="repository-url" name="repository-url" required>
+
+    <label for="project-notes">느낀 점:</label>
+    <textarea id="project-notes" name="project-notes" rows="4" required></textarea>
+
+    <input type="submit" value="게시물 작성">
+  </form>
+
+  <script>
+    // 게시물 목록을 동적으로 가져와서 페이지에 추가하는 JavaScript 코드를 작성해야 합니다.
+    const postList = document.getElementById('post-list');
+
+    // 서버에서 게시물 데이터를 가져오는 함수
+    function fetchPosts() {
+      fetch('/data')
+        .then((response) => response.json())
+        .then((data) => {
+          // 데이터를 받아와서 게시물 목록을 업데이트
+          data.forEach((post) => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+              <h3>${post['project-name']}</h3>
+              <p>시작 날짜: ${post['start-date']}</p>
+              <p>완료 날짜: ${post['end-date']}</p>
+              <p><a href="${post['repository-url']}">Git Repository</a></p>
+              <p>${post['project-notes']}</p>
+            `;
+            postList.appendChild(listItem);
+          });
+        })
+        .catch((error) => {
+          console.error('게시물 데이터를 가져오지 못했습니다:', error);
+        });
+    }
+
+    // 페이지 로드 시 게시물 목록을 가져오기
+    fetchPosts();
+  </script>
+</body>
+</html>
