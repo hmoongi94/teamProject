@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const path = require('path');
+const fs = require('fs');
 const port = 5001;
 
 // 정적 파일 제공을 위한 미들웨어 설정
@@ -14,6 +16,19 @@ app.get('/', (req, res) => {
 app.get('/sub', (req, res) => {
   res.sendFile(__dirname + '/public/sub.html');
 });
+
+
+
+// * loadData전용 라우팅 /data 엔드포인트로 작성된다.
+// * data.json을 읽도록 요청받은 것을 해결하여 데이터를 보낸다.
+
+app.get('/data', (req, res) => {
+  const dataPath = path.join(__dirname, './public/data/data.json');
+  const data = fs.readFileSync(dataPath, 'utf8');
+  res.send(data);
+});
+
+
 
 // 서버 시작
 app.listen(port, () => {
